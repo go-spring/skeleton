@@ -1,0 +1,12 @@
+// ping.idl
+
+type PingReq {
+    string name
+}
+
+rpc Ping(PingReq) PingResp {
+    method="GET"
+    path="/ping"
+}
+
+type PingResp Response<string>

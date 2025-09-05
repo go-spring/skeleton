@@ -1,0 +1,12 @@
+// common.idl
+
+enum ErrCode {
+    ErrOk = 0
+    PARAM_ERROR = 100003
+}
+
+type Response<T> {
+    ErrCode errno
+    string errmsg
+    T data
+}

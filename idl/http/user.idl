@@ -1,0 +1,37 @@
+// user.idl
+
+enum UserLevel {
+    Normal = 0
+    VIP = 1
+}
+
+type User {
+    string id
+    string name
+    string email
+    UserLevel level
+}
+
+type RegisterUserReq {
+    string id
+    string name
+    string email
+}
+
+type RegisterUserResp Response<User?>
+
+rpc RegisterUser(RegisterUserReq) RegisterUserResp {
+    method="POST"
+    path="/registerUser"
+}
+
+type UpgradeUserReq {
+    string id
+}
+
+type UpgradeUserResp Response<User?>
+
+rpc UpgradeUser(UpgradeUserReq) UpgradeUserResp {
+    method="POST"
+    path="/upgradeUser"
+}
