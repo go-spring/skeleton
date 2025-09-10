@@ -4,62 +4,39 @@ import (
 	"fmt"
 	"net/http"
 
-	"GS_PROJECT_MODULE/idl/http/proto"
-
 	"github.com/go-spring/spring-core/gs"
 )
 
-// Middleware 定义中间件的原型
+func init() {
+	gs.Object(&ServerConfig{})
+}
+
+// Middleware defines the prototype for HTTP middlewares.
+// A Middleware wraps an http.Handler and returns a new http.Handler.
 type Middleware func(next http.Handler) http.Handler
 
-// Middlewares 定义中间件列表
-type Middlewares []Middleware
-
-// Chain 创建一个中间件链
-func Chain(h http.Handler, mws Middlewares) http.Handler {
+// Chain applies multiple middlewares to an http.Handler in order.
+// Middlewares are applied from first to last (outermost to innermost).
+func Chain(h http.Handler, mws ...Middleware) http.Handler {
 	for i := len(mws) - 1; i >= 0; i-- {
 		h = mws[i](h)
 	}
 	return h
 }
 
-func init() {
-	gs.Object(&ServerConfig{})
-	gs.Provide(func(config *ServerConfig, server *GS_PROJECT_NAMEController) http.Handler {
-		mux := http.NewServeMux()
-		proto.InitRouter(mux, server)
-		mws := Middlewares{
-			Recovery(config.RecoveryConfig),
-			Trace(config.TraceConfig),
-			Metric(config.MetricConfig),
-		}
-		return Chain(mux, mws)
-	})
-}
-
-// ServerConfig 服务配置
+// ServerConfig defines the configuration for an HTTP server.
+// It contains sub-configs for recovery, tracing, and metrics.
 type ServerConfig struct {
 	RecoveryConfig RecoveryConfig `value:"${recovery}"`
 	TraceConfig    TraceConfig    `value:"${trace}"`
 	MetricConfig   MetricConfig   `value:"${metric}"`
 }
 
-// RecoveryConfig 崩溃恢复配置
 type RecoveryConfig struct {
 	Msg string `value:"${msg:=recovery}"`
 }
 
-// TraceConfig 链路追踪配置
-type TraceConfig struct {
-	Msg string `value:"${msg:=trace}"`
-}
-
-// MetricConfig 监控指标配置
-type MetricConfig struct {
-	Msg string `value:"${msg:=metric}"`
-}
-
-// Recovery 崩溃恢复中间件
+// Recovery returns a middleware that recovers from panics during request handling.
 func Recovery(config RecoveryConfig) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +51,11 @@ func Recovery(config RecoveryConfig) Middleware {
 	}
 }
 
-// Trace 链路追踪中间件
+type TraceConfig struct {
+	Msg string `value:"${msg:=trace}"`
+}
+
+// Trace returns a middleware that logs a trace message for each request.
 func Trace(config TraceConfig) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +65,11 @@ func Trace(config TraceConfig) Middleware {
 	}
 }
 
-// Metric 监控指标中间件
+type MetricConfig struct {
+	Msg string `value:"${msg:=metric}"`
+}
+
+// Metric returns a middleware that logs a metric message for each request.
 func Metric(config MetricConfig) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

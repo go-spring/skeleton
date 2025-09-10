@@ -2,6 +2,18 @@
 
 package proto
 
+import (
+	"errors"
+	"fmt"
+	"net/http"
+	"strings"
+)
+
+var _ = errors.New
+var _ = strings.Count
+var _ = http.NewServeMux
+
+// Error codes
 type ErrCode int32
 
 const (
@@ -10,17 +22,39 @@ const (
 )
 
 var (
-	ErrCode_name = map[int32]string{
+	ErrCode_name = map[ErrCode]string{
 		0:      "ErrOk",
 		100003: "PARAM_ERROR",
 	}
-	ErrCode_value = map[string]int32{
+	ErrCode_value = map[string]ErrCode{
 		"ErrOk":       0,
 		"PARAM_ERROR": 100003,
 	}
 )
 
-func OneOfErrCode(i int32) bool {
+// ErrCodeAsString wraps ErrCode to encode/decode as a JSON string
+type ErrCodeAsString ErrCode
+
+// MarshalJSON implements custom JSON encoding for the enum as a string
+func (x ErrCodeAsString) MarshalJSON() ([]byte, error) {
+	if s, ok := ErrCode_name[ErrCode(x)]; ok {
+		return []byte(fmt.Sprintf("\"%s\"", s)), nil
+	}
+	return nil, fmt.Errorf("invalid ErrCode: %d", x)
+}
+
+// UnmarshalJSON implements custom JSON decoding for the enum from a string
+func (x *ErrCodeAsString) UnmarshalJSON(data []byte) error {
+	str := strings.Trim(string(data), "\"")
+	if v, ok := ErrCode_value[str]; ok {
+		*x = ErrCodeAsString(v)
+		return nil
+	}
+	return fmt.Errorf("invalid ErrCode value: %q", str)
+}
+
+// OneOfErrCode is usually used for validation.
+func OneOfErrCode(i ErrCode) bool {
 	_, ok := ErrCode_name[i]
 	return ok
 }

@@ -3,21 +3,32 @@
 package proto
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
+	"strings"
 )
 
+var _ = errors.New
+var _ = strings.Count
+var _ = http.NewServeMux
+
 type PingReq struct {
-	Name string `json:"name"`
+	// Name parameter
+	Name string `json:"Name"`
 }
 
+// NewPingReq creates a new instance of the struct and sets default values if defined
 func NewPingReq() *PingReq {
 	return &PingReq{}
 }
 
+// New implements the Object interface
 func (x *PingReq) New() any {
 	return NewPingReq()
 }
 
+// GetName returns the value of Name
 func (x *PingReq) GetName() (r string) {
 	if x != nil {
 		return x.Name
@@ -25,33 +36,47 @@ func (x *PingReq) GetName() (r string) {
 	return r
 }
 
+// SetName sets the value of Name
 func (x *PingReq) SetName(v string) {
 	if x != nil {
 		x.Name = v
 	}
 }
 
-func (p *PingReq) String() string {
-	if p == nil {
+// Binding extracts non-body values (header, path, query) from *http.Request
+func (x *PingReq) Binding(r *http.Request) error {
+	return nil
+}
+
+// Validate checks field values using generated validation expressions
+func (x *PingReq) Validate() error {
+	return nil
+}
+
+func (x *PingReq) String() string {
+	if x == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("PingReq(%+v)", *p)
+	return fmt.Sprintf("PingReq(%+v)", *x)
 }
 
 type PingResp struct {
-	Errno  ErrCode `json:"errno"`
-	Errmsg string  `json:"errmsg"`
-	Data   string  `json:"data"`
+	Errno  ErrCode `json:"Errno"`
+	Errmsg string  `json:"Errmsg"`
+	Data   string  `json:"Data"`
 }
 
+// NewPingResp creates a new instance of the struct and sets default values if defined
 func NewPingResp() *PingResp {
 	return &PingResp{}
 }
 
+// New implements the Object interface
 func (x *PingResp) New() any {
 	return NewPingResp()
 }
 
+// GetErrno returns the value of Errno
 func (x *PingResp) GetErrno() (r ErrCode) {
 	if x != nil {
 		return x.Errno
@@ -59,12 +84,14 @@ func (x *PingResp) GetErrno() (r ErrCode) {
 	return r
 }
 
+// SetErrno sets the value of Errno
 func (x *PingResp) SetErrno(v ErrCode) {
 	if x != nil {
 		x.Errno = v
 	}
 }
 
+// GetErrmsg returns the value of Errmsg
 func (x *PingResp) GetErrmsg() (r string) {
 	if x != nil {
 		return x.Errmsg
@@ -72,12 +99,14 @@ func (x *PingResp) GetErrmsg() (r string) {
 	return r
 }
 
+// SetErrmsg sets the value of Errmsg
 func (x *PingResp) SetErrmsg(v string) {
 	if x != nil {
 		x.Errmsg = v
 	}
 }
 
+// GetData returns the value of Data
 func (x *PingResp) GetData() (r string) {
 	if x != nil {
 		return x.Data
@@ -85,15 +114,26 @@ func (x *PingResp) GetData() (r string) {
 	return r
 }
 
+// SetData sets the value of Data
 func (x *PingResp) SetData(v string) {
 	if x != nil {
 		x.Data = v
 	}
 }
 
-func (p *PingResp) String() string {
-	if p == nil {
+// Binding extracts non-body values (header, path, query) from *http.Request
+func (x *PingResp) Binding(r *http.Request) error {
+	return nil
+}
+
+// Validate checks field values using generated validation expressions
+func (x *PingResp) Validate() error {
+	return nil
+}
+
+func (x *PingResp) String() string {
+	if x == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("PingResp(%+v)", *p)
+	return fmt.Sprintf("PingResp(%+v)", *x)
 }

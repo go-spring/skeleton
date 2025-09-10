@@ -16,13 +16,13 @@ func (h *UserController) RegisterUser(ctx context.Context, req *proto.RegisterUs
 	if err != nil {
 		return &proto.RegisterUserResp{
 			Errno:  proto.ErrCode_PARAM_ERROR,
-			Errmsg: proto.ErrCode_name[int32(proto.ErrCode_PARAM_ERROR)],
+			Errmsg: proto.ErrCode_name[proto.ErrCode_PARAM_ERROR],
 			Data:   nil,
 		}
 	}
 	return &proto.RegisterUserResp{
 		Errno:  proto.ErrCode_ErrOk,
-		Errmsg: proto.ErrCode_name[int32(proto.ErrCode_ErrOk)],
+		Errmsg: proto.ErrCode_name[proto.ErrCode_ErrOk],
 		Data:   user,
 	}
 }
@@ -32,13 +32,13 @@ func (h *UserController) UpgradeUser(ctx context.Context, req *proto.UpgradeUser
 	if err != nil {
 		return &proto.UpgradeUserResp{
 			Errno:  proto.ErrCode_PARAM_ERROR,
-			Errmsg: proto.ErrCode_name[int32(proto.ErrCode_PARAM_ERROR)],
+			Errmsg: proto.ErrCode_name[proto.ErrCode_PARAM_ERROR],
 			Data:   nil,
 		}
 	}
 	return &proto.UpgradeUserResp{
 		Errno:  proto.ErrCode_ErrOk,
-		Errmsg: proto.ErrCode_name[int32(proto.ErrCode_ErrOk)],
+		Errmsg: proto.ErrCode_name[proto.ErrCode_ErrOk],
 		Data:   user,
 	}
 }

@@ -3,9 +3,21 @@
 package proto
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
+	"strings"
 )
 
+var _ = errors.New
+var _ = strings.Count
+var _ = http.NewServeMux
+
+const MAX_NAME_LEN int64 = 64
+
+const MAX_EMAIL_LEN int64 = 128
+
+// User level
 type UserLevel int32
 
 const (
@@ -14,36 +26,65 @@ const (
 )
 
 var (
-	UserLevel_name = map[int32]string{
+	UserLevel_name = map[UserLevel]string{
 		0: "Normal",
 		1: "VIP",
 	}
-	UserLevel_value = map[string]int32{
+	UserLevel_value = map[string]UserLevel{
 		"Normal": 0,
 		"VIP":    1,
 	}
 )
 
-func OneOfUserLevel(i int32) bool {
+// UserLevelAsString wraps UserLevel to encode/decode as a JSON string
+type UserLevelAsString UserLevel
+
+// MarshalJSON implements custom JSON encoding for the enum as a string
+func (x UserLevelAsString) MarshalJSON() ([]byte, error) {
+	if s, ok := UserLevel_name[UserLevel(x)]; ok {
+		return []byte(fmt.Sprintf("\"%s\"", s)), nil
+	}
+	return nil, fmt.Errorf("invalid UserLevel: %d", x)
+}
+
+// UnmarshalJSON implements custom JSON decoding for the enum from a string
+func (x *UserLevelAsString) UnmarshalJSON(data []byte) error {
+	str := strings.Trim(string(data), "\"")
+	if v, ok := UserLevel_value[str]; ok {
+		*x = UserLevelAsString(v)
+		return nil
+	}
+	return fmt.Errorf("invalid UserLevel value: %q", str)
+}
+
+// OneOfUserLevel is usually used for validation.
+func OneOfUserLevel(i UserLevel) bool {
 	_, ok := UserLevel_name[i]
 	return ok
 }
 
 type User struct {
-	Id    string    `json:"id"`
-	Name  string    `json:"name"`
-	Email string    `json:"email"`
-	Level UserLevel `json:"level"`
+	// User ID
+	Id string `json:"Id"`
+	// User name
+	Name string `json:"Name"`
+	// User email
+	Email string `json:"Email"`
+	// User level
+	Level UserLevel `json:"Level"`
 }
 
+// NewUser creates a new instance of the struct and sets default values if defined
 func NewUser() *User {
 	return &User{}
 }
 
+// New implements the Object interface
 func (x *User) New() any {
 	return NewUser()
 }
 
+// GetId returns the value of Id
 func (x *User) GetId() (r string) {
 	if x != nil {
 		return x.Id
@@ -51,12 +92,14 @@ func (x *User) GetId() (r string) {
 	return r
 }
 
+// SetId sets the value of Id
 func (x *User) SetId(v string) {
 	if x != nil {
 		x.Id = v
 	}
 }
 
+// GetName returns the value of Name
 func (x *User) GetName() (r string) {
 	if x != nil {
 		return x.Name
@@ -64,12 +107,14 @@ func (x *User) GetName() (r string) {
 	return r
 }
 
+// SetName sets the value of Name
 func (x *User) SetName(v string) {
 	if x != nil {
 		x.Name = v
 	}
 }
 
+// GetEmail returns the value of Email
 func (x *User) GetEmail() (r string) {
 	if x != nil {
 		return x.Email
@@ -77,12 +122,14 @@ func (x *User) GetEmail() (r string) {
 	return r
 }
 
+// SetEmail sets the value of Email
 func (x *User) SetEmail(v string) {
 	if x != nil {
 		x.Email = v
 	}
 }
 
+// GetLevel returns the value of Level
 func (x *User) GetLevel() (r UserLevel) {
 	if x != nil {
 		return x.Level
@@ -90,33 +137,59 @@ func (x *User) GetLevel() (r UserLevel) {
 	return r
 }
 
+// SetLevel sets the value of Level
 func (x *User) SetLevel(v UserLevel) {
 	if x != nil {
 		x.Level = v
 	}
 }
 
-func (p *User) String() string {
-	if p == nil {
+// Binding extracts non-body values (header, path, query) from *http.Request
+func (x *User) Binding(r *http.Request) error {
+	return nil
+}
+
+// Validate checks field values using generated validation expressions
+func (x *User) Validate() error {
+	if !(len(x.Id) > 0 && len(x.Id) <= 64) {
+		return errors.New("validate failed on User.Id")
+	}
+	if !(len(x.Name) > 0 && len(x.Name) <= 64) {
+		return errors.New("validate failed on User.Name")
+	}
+	if !(len(x.Email) > 0 && len(x.Email) <= 128) {
+		return errors.New("validate failed on User.Email")
+	}
+	return nil
+}
+
+func (x *User) String() string {
+	if x == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("User(%+v)", *p)
+	return fmt.Sprintf("User(%+v)", *x)
 }
 
 type RegisterUserReq struct {
-	Id    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	// User ID
+	Id string `json:"Id"`
+	// User name
+	Name string `json:"Name"`
+	// User email
+	Email string `json:"Email"`
 }
 
+// NewRegisterUserReq creates a new instance of the struct and sets default values if defined
 func NewRegisterUserReq() *RegisterUserReq {
 	return &RegisterUserReq{}
 }
 
+// New implements the Object interface
 func (x *RegisterUserReq) New() any {
 	return NewRegisterUserReq()
 }
 
+// GetId returns the value of Id
 func (x *RegisterUserReq) GetId() (r string) {
 	if x != nil {
 		return x.Id
@@ -124,12 +197,14 @@ func (x *RegisterUserReq) GetId() (r string) {
 	return r
 }
 
+// SetId sets the value of Id
 func (x *RegisterUserReq) SetId(v string) {
 	if x != nil {
 		x.Id = v
 	}
 }
 
+// GetName returns the value of Name
 func (x *RegisterUserReq) GetName() (r string) {
 	if x != nil {
 		return x.Name
@@ -137,12 +212,14 @@ func (x *RegisterUserReq) GetName() (r string) {
 	return r
 }
 
+// SetName sets the value of Name
 func (x *RegisterUserReq) SetName(v string) {
 	if x != nil {
 		x.Name = v
 	}
 }
 
+// GetEmail returns the value of Email
 func (x *RegisterUserReq) GetEmail() (r string) {
 	if x != nil {
 		return x.Email
@@ -150,33 +227,56 @@ func (x *RegisterUserReq) GetEmail() (r string) {
 	return r
 }
 
+// SetEmail sets the value of Email
 func (x *RegisterUserReq) SetEmail(v string) {
 	if x != nil {
 		x.Email = v
 	}
 }
 
-func (p *RegisterUserReq) String() string {
-	if p == nil {
+// Binding extracts non-body values (header, path, query) from *http.Request
+func (x *RegisterUserReq) Binding(r *http.Request) error {
+	return nil
+}
+
+// Validate checks field values using generated validation expressions
+func (x *RegisterUserReq) Validate() error {
+	if !(len(x.Id) > 0 && len(x.Id) <= 64) {
+		return errors.New("validate failed on RegisterUserReq.Id")
+	}
+	if !(len(x.Name) > 0 && len(x.Name) <= 64) {
+		return errors.New("validate failed on RegisterUserReq.Name")
+	}
+	if !(len(x.Email) > 0 && len(x.Email) <= 128) {
+		return errors.New("validate failed on RegisterUserReq.Email")
+	}
+	return nil
+}
+
+func (x *RegisterUserReq) String() string {
+	if x == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("RegisterUserReq(%+v)", *p)
+	return fmt.Sprintf("RegisterUserReq(%+v)", *x)
 }
 
 type RegisterUserResp struct {
-	Errno  ErrCode `json:"errno"`
-	Errmsg string  `json:"errmsg"`
-	Data   *User   `json:"data"`
+	Errno  ErrCode `json:"Errno"`
+	Errmsg string  `json:"Errmsg"`
+	Data   *User   `json:"Data,omitempty"`
 }
 
+// NewRegisterUserResp creates a new instance of the struct and sets default values if defined
 func NewRegisterUserResp() *RegisterUserResp {
 	return &RegisterUserResp{}
 }
 
+// New implements the Object interface
 func (x *RegisterUserResp) New() any {
 	return NewRegisterUserResp()
 }
 
+// GetErrno returns the value of Errno
 func (x *RegisterUserResp) GetErrno() (r ErrCode) {
 	if x != nil {
 		return x.Errno
@@ -184,12 +284,14 @@ func (x *RegisterUserResp) GetErrno() (r ErrCode) {
 	return r
 }
 
+// SetErrno sets the value of Errno
 func (x *RegisterUserResp) SetErrno(v ErrCode) {
 	if x != nil {
 		x.Errno = v
 	}
 }
 
+// GetErrmsg returns the value of Errmsg
 func (x *RegisterUserResp) GetErrmsg() (r string) {
 	if x != nil {
 		return x.Errmsg
@@ -197,12 +299,14 @@ func (x *RegisterUserResp) GetErrmsg() (r string) {
 	return r
 }
 
+// SetErrmsg sets the value of Errmsg
 func (x *RegisterUserResp) SetErrmsg(v string) {
 	if x != nil {
 		x.Errmsg = v
 	}
 }
 
+// GetData returns the value of Data
 func (x *RegisterUserResp) GetData() (r *User) {
 	if x != nil {
 		return x.Data
@@ -210,31 +314,46 @@ func (x *RegisterUserResp) GetData() (r *User) {
 	return r
 }
 
+// SetData sets the value of Data
 func (x *RegisterUserResp) SetData(v *User) {
 	if x != nil {
 		x.Data = v
 	}
 }
 
-func (p *RegisterUserResp) String() string {
-	if p == nil {
+// Binding extracts non-body values (header, path, query) from *http.Request
+func (x *RegisterUserResp) Binding(r *http.Request) error {
+	return nil
+}
+
+// Validate checks field values using generated validation expressions
+func (x *RegisterUserResp) Validate() error {
+	return nil
+}
+
+func (x *RegisterUserResp) String() string {
+	if x == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("RegisterUserResp(%+v)", *p)
+	return fmt.Sprintf("RegisterUserResp(%+v)", *x)
 }
 
 type UpgradeUserReq struct {
-	Id string `json:"id"`
+	// User ID
+	Id string `json:"Id" path:"id"`
 }
 
+// NewUpgradeUserReq creates a new instance of the struct and sets default values if defined
 func NewUpgradeUserReq() *UpgradeUserReq {
 	return &UpgradeUserReq{}
 }
 
+// New implements the Object interface
 func (x *UpgradeUserReq) New() any {
 	return NewUpgradeUserReq()
 }
 
+// GetId returns the value of Id
 func (x *UpgradeUserReq) GetId() (r string) {
 	if x != nil {
 		return x.Id
@@ -242,33 +361,52 @@ func (x *UpgradeUserReq) GetId() (r string) {
 	return r
 }
 
+// SetId sets the value of Id
 func (x *UpgradeUserReq) SetId(v string) {
 	if x != nil {
 		x.Id = v
 	}
 }
 
-func (p *UpgradeUserReq) String() string {
-	if p == nil {
+// Binding extracts non-body values (header, path, query) from *http.Request
+func (x *UpgradeUserReq) Binding(r *http.Request) error {
+	return Binding(r, []BindingField{
+		{"UpgradeUserReq.Id", "path", "id", &x.Id},
+	})
+}
+
+// Validate checks field values using generated validation expressions
+func (x *UpgradeUserReq) Validate() error {
+	if !(len(x.Id) > 0 && len(x.Id) <= 64) {
+		return errors.New("validate failed on UpgradeUserReq.Id")
+	}
+	return nil
+}
+
+func (x *UpgradeUserReq) String() string {
+	if x == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("UpgradeUserReq(%+v)", *p)
+	return fmt.Sprintf("UpgradeUserReq(%+v)", *x)
 }
 
 type UpgradeUserResp struct {
-	Errno  ErrCode `json:"errno"`
-	Errmsg string  `json:"errmsg"`
-	Data   *User   `json:"data"`
+	Errno  ErrCode `json:"Errno"`
+	Errmsg string  `json:"Errmsg"`
+	Data   *User   `json:"Data,omitempty"`
 }
 
+// NewUpgradeUserResp creates a new instance of the struct and sets default values if defined
 func NewUpgradeUserResp() *UpgradeUserResp {
 	return &UpgradeUserResp{}
 }
 
+// New implements the Object interface
 func (x *UpgradeUserResp) New() any {
 	return NewUpgradeUserResp()
 }
 
+// GetErrno returns the value of Errno
 func (x *UpgradeUserResp) GetErrno() (r ErrCode) {
 	if x != nil {
 		return x.Errno
@@ -276,12 +414,14 @@ func (x *UpgradeUserResp) GetErrno() (r ErrCode) {
 	return r
 }
 
+// SetErrno sets the value of Errno
 func (x *UpgradeUserResp) SetErrno(v ErrCode) {
 	if x != nil {
 		x.Errno = v
 	}
 }
 
+// GetErrmsg returns the value of Errmsg
 func (x *UpgradeUserResp) GetErrmsg() (r string) {
 	if x != nil {
 		return x.Errmsg
@@ -289,12 +429,14 @@ func (x *UpgradeUserResp) GetErrmsg() (r string) {
 	return r
 }
 
+// SetErrmsg sets the value of Errmsg
 func (x *UpgradeUserResp) SetErrmsg(v string) {
 	if x != nil {
 		x.Errmsg = v
 	}
 }
 
+// GetData returns the value of Data
 func (x *UpgradeUserResp) GetData() (r *User) {
 	if x != nil {
 		return x.Data
@@ -302,15 +444,26 @@ func (x *UpgradeUserResp) GetData() (r *User) {
 	return r
 }
 
+// SetData sets the value of Data
 func (x *UpgradeUserResp) SetData(v *User) {
 	if x != nil {
 		x.Data = v
 	}
 }
 
-func (p *UpgradeUserResp) String() string {
-	if p == nil {
+// Binding extracts non-body values (header, path, query) from *http.Request
+func (x *UpgradeUserResp) Binding(r *http.Request) error {
+	return nil
+}
+
+// Validate checks field values using generated validation expressions
+func (x *UpgradeUserResp) Validate() error {
+	return nil
+}
+
+func (x *UpgradeUserResp) String() string {
+	if x == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("UpgradeUserResp(%+v)", *p)
+	return fmt.Sprintf("UpgradeUserResp(%+v)", *x)
 }

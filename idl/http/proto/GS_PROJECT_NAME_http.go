@@ -4,60 +4,31 @@ package proto
 
 import (
 	"context"
-	"encoding/json"
-	"io"
 	"net/http"
 )
 
+// GS_PROJECT_NAMEServer defines the interface that service must implement.
 type GS_PROJECT_NAMEServer interface {
+	// Create order API endpoint
 	CreateOrder(context.Context, *CreateOrderReq) *CreateOrderResp
+	// Pay order API endpoint
 	PayOrder(context.Context, *PayOrderReq) *PayOrderResp
+	// Ping API endpoint
 	Ping(context.Context, *PingReq) *PingResp
+	// Register a new user API endpoint
 	RegisterUser(context.Context, *RegisterUserReq) *RegisterUserResp
+	// Ship order API endpoint
 	ShipOrder(context.Context, *ShipOrderReq) *ShipOrderResp
+	// Upgrade a user to VIP level API endpoint
 	UpgradeUser(context.Context, *UpgradeUserReq) *UpgradeUserResp
 }
 
+// InitRouter registers the service handlers into the given *http.ServeMux.
 func InitRouter(mux *http.ServeMux, server GS_PROJECT_NAMEServer) {
-	mux.HandleFunc("POST /createOrder", JSON(server.CreateOrder))
-	mux.HandleFunc("POST /payOrder", JSON(server.PayOrder))
-	mux.HandleFunc("GET /ping", JSON(server.Ping))
-	mux.HandleFunc("POST /registerUser", JSON(server.RegisterUser))
-	mux.HandleFunc("POST /shipOrder", JSON(server.ShipOrder))
-	mux.HandleFunc("POST /upgradeUser", JSON(server.UpgradeUser))
-}
-
-func ReadRequest(r *http.Request, i interface{}) error {
-	b, err := io.ReadAll(r.Body)
-	if err != nil {
-		return err
-	}
-	if len(b) == 0 {
-		return nil
-	}
-	return json.Unmarshal(b, i)
-}
-
-func WriteResponse(w http.ResponseWriter, i interface{}) {
-	b, err := json.Marshal(i)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if _, err = w.Write(b); err != nil {
-		return
-	}
-}
-
-func JSON[Req interface{ New() any }, Resp any](h func(context.Context, Req) Resp) http.HandlerFunc {
-	var x Req
-	return func(w http.ResponseWriter, r *http.Request) {
-		req := x.New().(Req)
-		if err := ReadRequest(r, req); err != nil {
-			WriteResponse(w, err)
-			return
-		}
-		res := h(r.Context(), req)
-		WriteResponse(w, res)
-	}
+	mux.HandleFunc("POST /orders", HandleJSON(server.CreateOrder))
+	mux.HandleFunc("POST /orders/{id}/pay", HandleJSON(server.PayOrder))
+	mux.HandleFunc("GET /ping", HandleJSON(server.Ping))
+	mux.HandleFunc("POST /users", HandleJSON(server.RegisterUser))
+	mux.HandleFunc("POST /orders/{id}/ship", HandleJSON(server.ShipOrder))
+	mux.HandleFunc("POST /users/{id}/upgrade", HandleJSON(server.UpgradeUser))
 }

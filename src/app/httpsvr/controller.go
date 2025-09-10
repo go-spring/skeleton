@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-spring/spring-core/gs"
 	redigo "github.com/gomodule/redigo/redis"
-	goRedis "github.com/redis/go-redis/v9"
+	goredis "github.com/redis/go-redis/v9"
 )
 
 func init() {
@@ -21,13 +21,19 @@ type GS_PROJECT_NAMEController struct {
 	user.UserController
 
 	RedigoPool    *redigo.Pool    `autowire:""`
-	GoRedisClient *goRedis.Client `autowire:""`
+	GoRedisClient *goredis.Client `autowire:""`
 }
 
 func (c *GS_PROJECT_NAMEController) Ping(ctx context.Context, req *proto.PingReq) *proto.PingResp {
 	req.Name = "Go-Spring"
+
+	// Use go-redis client to set a key "ping"
 	c.GoRedisClient.Set(ctx, "ping", req.Name, 0)
+
 	p := c.RedigoPool.Get()
+	defer func() { p.Close() }()
+
+	// Use redigo client to get the value of the "ping" key
 	reply, err := p.Do("GET", "ping")
 	if err != nil {
 		panic(err)
@@ -36,10 +42,11 @@ func (c *GS_PROJECT_NAMEController) Ping(ctx context.Context, req *proto.PingReq
 	if err != nil {
 		panic(err)
 	}
-	p.Close()
+
+	// Return the Ping response with data read from Redis
 	return &proto.PingResp{
-		Errno:  0,
-		Errmsg: "",
+		Errno:  proto.ErrCode_ErrOk,
+		Errmsg: proto.ErrCode_name[proto.ErrCode_ErrOk],
 		Data:   data,
 	}
 }
