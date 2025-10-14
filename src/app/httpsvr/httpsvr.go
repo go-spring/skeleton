@@ -10,7 +10,7 @@ import (
 
 func init() {
 	// Register HTTP handler provider function
-	gs.Provide(func(config *ServerConfig, server *GS_PROJECT_NAMEController) http.Handler {
+	gs.Provide(func(config *ServerConfig, server *GS_PROJECT_NAMEController) *gs.HttpServeMux {
 		mux := http.NewServeMux()
 
 		// Register all API endpoints defined in the proto to the router
@@ -20,10 +20,12 @@ func init() {
 		mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./public"))))
 
 		// Apply middleware chain to the mux and return the final handler
-		return Chain(mux,
-			Recovery(config.RecoveryConfig),
-			Trace(config.TraceConfig),
-			Metric(config.MetricConfig),
-		)
+		return &gs.HttpServeMux{
+			Handler: Chain(mux,
+				Recovery(config.RecoveryConfig),
+				Trace(config.TraceConfig),
+				Metric(config.MetricConfig),
+			),
+		}
 	})
 }
